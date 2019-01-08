@@ -1,0 +1,39 @@
+{
+  "apps": [
+    {
+      //应用名称
+      "name": "my-app",
+      //执行文件的路径
+      "script": "./build/server/static/js/server.js",
+      "env": {
+        "COMMON_VARIABLE": "true"
+      },
+      "env_production": {
+        "NODE_ENV": "production"
+      }
+    }
+  ],
+  "deploy": {
+    "production": {
+      //服务器用户
+      "user": "mengfei",
+      //服务器地址
+      "host": ["47.107.180.194"],
+      //服务器端口
+      "port": "9093",
+      "ref": "origin/master",
+      //这里填你的项目git ssh
+      "repo": "git@github.com:helloMengfei123/helloMengfei123.github.io.git",
+      //服务器的存放项目路径
+      "path": "/html",
+      "ssh_options": "StrictHostKeyChecking=no",
+      //钩子
+      "post-deploy": "npm --registry https://registry.npm.taobao.org install && npm run build && pm2 startOrRestart ecosystem.json --env production",
+      "env": {
+        //环境
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}
+

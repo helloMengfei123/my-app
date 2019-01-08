@@ -1,20 +1,41 @@
 import React from 'react'
 import ReactDom from 'react-dom'
-import App from './app'
-import {createStore, applyMiddleware, compose} from 'redux'
+import { createStore, applyMiddleware, compose } from 'redux'
 import thunk from 'redux-thunk'
-import {Provider} from 'react-redux'
-import {counter} from './index.redux'
-const store = createStore(counter,compose(
+import { Provider } from 'react-redux'
+import { BrowserRouter, Route,Switch } from 'react-router-dom'
+import reducers from './reducer'
+import './config'
+import AuthRoute from './component/authRoute/authRoute'
+import BossInfo from './container/bossinfo/bossinfo'
+import GeniusInfo from './container/geniusinfo/geniusinfo'
+import Dashboard from './container/dashboard/dashboard'
+import Login from './container/login/login'
+import Register from './container/register/register'
+import Chat from './component/chat/chat'
+import './index.css'
+const store = createStore(reducers, compose(
   applyMiddleware(thunk),
-  window.devToolsExtension?window.devToolsExtension():f=>f
+  window.devToolsExtension ? window.devToolsExtension() : f => f
 ))
 
-  ReactDom.render(
-    (<Provider store={store}>
-       <App/>
-    </Provider>),
-    document.getElementById('root')
-  )
+ReactDom.render(
+  (<Provider store={store}>
+    <BrowserRouter>
+      <div>
+        <AuthRoute></AuthRoute>
+        <Switch>
+        <Route path='/bossinfo' component={BossInfo}></Route>
+        <Route path='/geniusinfo' component={GeniusInfo}></Route>
+        <Route path='/login' component={Login}></Route>
+        <Route path='/register' component={Register}></Route>
+        <Route path='/chat/:user' component={Chat}></Route>
+        <Route component={Dashboard}></Route>
+        </Switch>
+      </div>
+    </BrowserRouter>
+  </Provider>),
+  document.getElementById('root')
+)
 
 

@@ -1,46 +1,34 @@
 const express = require('express')
-const mongoose = require('mongoose')
-const DB_URL = 'mongodb://localhost:27017'
-//链接数据库
-mongoose.connect(DB_URL)
-mongoose.connection.on('connected',function(){
-  console.log('mongo connect success')
-})
-
-const user = mongoose.model('user',new mongoose.Schema({
-  name:{type:String,require:true},
-  age:{type:Number,require:true},
-}))
-//新增数据
-// user.create({
-//   name:'mengfei',
-//   age:12,
-// },function(err,doc){
-//   if(!err){
-//     console.log(doc)
-//   }else{
-//     console.log(err)
-//   }
-// })
-//创建app
+const bodyParser = require('body-parser')
+const cookieParser = require('cookie-parser')
+const model = require('./model')
+const Chat = model.getModel('chat')
 const app = express()
 
-app.listen(9093,function(){
-  console.log('杨梦飞')
-})
+const http = require('http').Server(app);
+const io = require('socket.io')(http);
 
-app.get('/',function(req,res){
-  res.send('<h1>来吧</h1>')
+io.on('connection', function(socket){
+  socket.on('sendmsg',function(data){
+  console.log(data)
+const {from,to,msg} = data
+const chatid = [from,to].sort().join('_')
+Chat.create({chatid,from,to,content:msg},function(err,doc){
+  io.emit('recvmsg',Object.assign({},doc._doc))
 })
-
-app.get('/data',function(req,res){
-  //查找
-  user.findOne({'age':26},function(err,doc){
-    res.json(doc)
+    // io.emit('recvmsg',data)
   })
-  // res.json({"name":"梦飞","age":"19"})
-})
+});
+const userRouter = require('./user')
 
-user.update({'name':'mengfei'},{'$set':{'age':26}},function(err,doc){
-  console.log(doc)
-})
+
+app.use(cookieParser())
+app.use(bodyParser.json())
+app.use('/user',userRouter)
+// app.listen(9093,function(){
+//   console.log('node app start at port 9093')
+// })
+app.set('port', process.env.PORT || 9093);
+const server = http.listen(app.get('port'), function() {
+  console.log('start at port:' + server.address().port);
+}) ;
